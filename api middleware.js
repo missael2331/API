@@ -3,11 +3,26 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
+// Middleware para parsear el cuerpo de la solicitud
+app.use(express.json());
+
+// Ruta de login (simulada)
+app.post('/api/login', (req, res) => {
+    const { usuario, clave } = req.body;
+
+    // Validación simple (en un caso real usarías una base de datos)
+    if (usuario === 'admin' && clave === '1234') {
+        res.status(200).json({ token: 'Bearer miTokenSecreto' });
+    } else {
+        res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+});
+
 // Middleware para validar el token de autenticación
 function authMiddleware(req, res, next) {
     const token = req.headers['authorization'];
     if (token && token === 'Bearer miTokenSecreto') {
-        next(); // Si el token es válido, continuar
+        next();
     } else {
         res.status(401).json({ message: 'No autorizado' });
     }
@@ -17,14 +32,11 @@ function authMiddleware(req, res, next) {
 function validationMiddleware(req, res, next) {
     const { nombre, edad } = req.body;
     if (nombre && typeof nombre === 'string' && edad && typeof edad === 'number') {
-        next(); // Si los datos son válidos, continuar
+        next();
     } else {
         res.status(400).json({ message: 'Datos inválidos' });
     }
 }
-
-// Middleware para parsear el cuerpo de la solicitud
-app.use(express.json());
 
 // Ruta protegida que utiliza ambos middlewares
 app.post('/api/protegido', authMiddleware, validationMiddleware, (req, res) => {
@@ -40,3 +52,4 @@ app.get('/api/publico', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+                                                   
